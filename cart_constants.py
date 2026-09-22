@@ -44,9 +44,9 @@ PRESETS = {
     "📈 Regression": dict(task="reg", criterion="variance", depth=4, leaf=5, prune="off", prune_leaves=DEFAULT_PRUNE_LEAVES, n=DEFAULT_N, n_noise=DEFAULT_NOISE, label_noise=0, seed=DEFAULT_SEED, fx=0, fy=3),
 }
 PRESET_HELP = {
-    "🌳 Flacher Baum": "Klassifikation, Tiefe 3, Blätter mit mindestens 5 Lieferungen: 8 Blätter, Trainingsfehler 15.8 %, Testfehler 17.2 % (Raten: 46.4 %). Der erste Schnitt ist das Ladegewicht (ab 798 kg wird es eng), danach Verkehr und Distanz - Training und Test liegen dicht beieinander.",
+    "🌳 Flacher Baum": "Klassifikation, Tiefe 3, Blätter mit mindestens 5 Lieferungen: 8 Blätter, Trainingsfehler 15.8 %, Testfehler 17.2 % (Raten: 46.4 %). Der erste Split ist das Ladegewicht (ab 798 kg wird es eng), danach Verkehr und Distanz - Training und Test liegen dicht beieinander.",
     "🌲 Voll gewachsen": "Tiefe 16, Blätter ab einer Lieferung: der Baum wächst, bis jedes Blatt rein ist - 100 Blätter, Trainingsfehler 0 %, Testfehler 16.7 %, kaum anders als beim flachen Baum. Die Genauigkeit täuscht: AUC 0.830 statt 0.882 und Log-Loss 5.76 statt 0.42 - die Blätter sind überzuversichtlich. Überanpassung.",
     "✂️ Beschneiden": "Derselbe volle Baum, mit Kosten-Komplexität auf 17 Blätter beschnitten (alpha 0.004, gewählt per Kreuzvalidierung auf dem Training): Trainingsfehler 10.4 %, Testfehler 16.4 %, AUC 0.890, Log-Loss 0.58 - der Testfehler ist nicht schlechter als beim vollen Baum, der Log-Loss viel besser.",
     "🏷️ Falsche Etiketten": "10 % der Trainingsetiketten sind vertauscht, der Baum wächst voll (125 Blätter, Trainingsfehler 0 %): er lernt die falschen Etiketten mit, der Testfehler steigt auf 23.6 % (ohne falsche Etiketten 16.7 %). Ein flacher Baum wäre kaum betroffen.",
-    "📈 Regression": "Regression: Dauer in Minuten, Tiefe 4, Blätter ab 5 Lieferungen: 16 Blätter, Trainingsfehler (RMSE) 12.3 min, Testfehler 14.4 min gegen 27.2 min beim Raten des Mittelwerts (R² 0.719). Der wichtigste Schnitt ist die Distanz (65.5 % der Wichtigkeit); der Baum liefert eine Treppe, keine Gerade.",
+    "📈 Regression": "Regression: Dauer in Minuten, Tiefe 4, Blätter ab 5 Lieferungen: 16 Blätter, Trainingsfehler (RMSE) 12.3 min, Testfehler 14.4 min gegen 27.2 min beim Raten des Mittelwerts (R² 0.719). Der wichtigste Split ist die Distanz (65.5 % der Wichtigkeit); der Baum liefert eine Treppe, keine Gerade.",
 }

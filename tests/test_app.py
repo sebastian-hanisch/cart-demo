@@ -59,10 +59,10 @@ def test_every_preset_renders_with_a_verdict_of_the_expected_kind(name):
 
 def test_the_task_switch_hides_the_criterion_and_the_label_noise():
     at = _run()
-    assert {"Schnittkriterium", "Falsche Etiketten im Training [%]"} <= _labels(at)
+    assert {"Split-Kriterium", "Falsche Etiketten im Training [%]"} <= _labels(at)
     at.session_state["task_select"] = "reg"
     at.run()
-    assert not at.exception and not {"Schnittkriterium", "Falsche Etiketten im Training [%]"} & _labels(at)
+    assert not at.exception and not {"Split-Kriterium", "Falsche Etiketten im Training [%]"} & _labels(at)
     assert any("Varianz" in c.value for c in at.sidebar.caption) and any("nur bei der Klassifikation" in c.value for c in at.sidebar.caption)
     assert any(m.label == "Test: R² / MAE" for m in at.metric)
 
@@ -163,7 +163,7 @@ def test_every_step_of_a_small_tree_renders():
         at.run()
         assert not at.exception, k
         if k == 0:
-            assert any("Schnitt 1 von" in m.value for m in at.markdown)
+            assert any("Split 1 von" in m.value for m in at.markdown)
 
 
 def test_play_renders_several_frames_without_duplicate_keys(monkeypatch):

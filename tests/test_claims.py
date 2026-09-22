@@ -1,5 +1,5 @@
 """Jede Zahl aus Texten, Hilfen und README ist hier belegt (gemessen am 2026-09-21, Toleranzen fangen Rundung ab). Die Daten kommen aus festen Seeds und ihre Bäume aus reiner numpy-Rechnung; Fehlerquoten sind exakte Brüche
-und stehen fest. Wo etwas von Gleichständen abhängen könnte (Reihenfolge gleicher Schnitte), steht ein Rand. Laufzeiten stehen in der App nicht und werden nie geprüft."""
+und stehen fest. Wo etwas von Gleichständen abhängen könnte (Reihenfolge gleicher Splits), steht ein Rand. Laufzeiten stehen in der App nicht und werden nie geprüft."""
 
 import functools
 

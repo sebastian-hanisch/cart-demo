@@ -1,7 +1,7 @@
-"""CART von Grund auf in numpy: gieriges Wachsen mit Schnittsuche über alle Schwellen aller Merkmale (Sortieren + kumulative Summen), Gini | Entropie | Varianz, Beschneiden nach Kosten-Komplexität,
+"""CART von Grund auf in numpy: gieriges Wachsen mit Split-Suche über alle Schwellen aller Merkmale (Sortieren + kumulative Summen), Gini | Entropie | Varianz, Beschneiden nach Kosten-Komplexität,
 Auswertung von Hand (Genauigkeit, AUC, Log-Loss, RMSE, MAE, R²). Bibliotheken kommen nur in den Tests als Gegenprobe vor.
 
-Der Baum liegt in parallelen Feldern; die Knoten sind in Breitenreihenfolge nummeriert (Wurzel = 0, dann Ebene für Ebene). Deshalb ist "der Baum nach den ersten k Schnitten" einfach der Baum, in dem alle Knoten
+Der Baum liegt in parallelen Feldern; die Knoten sind in Breitenreihenfolge nummeriert (Wurzel = 0, dann Ebene für Ebene). Deshalb ist "der Baum nach den ersten k Splits" einfach der Baum, in dem alle Knoten
 ab dem k-ten inneren Knoten wieder Blätter sind. Ein Punkt geht nach links, wenn x[Merkmal] <= Schwelle (Schwelle = Mitte zwischen zwei benachbarten Werten)."""
 
 from dataclasses import dataclass, replace
@@ -42,7 +42,7 @@ class Tree:
         return np.nonzero(self.feature >= 0)[0]
 
 
-# --- Unreinheit und Schnittsuche ---------------------------------------------------------------------------------------------------------------------
+# --- Unreinheit und Split-Suche ---------------------------------------------------------------------------------------------------------------------
 
 def _impurity_from_p(p, criterion):
     if criterion == "gini":
@@ -60,7 +60,7 @@ def node_impurity(y, criterion):
 
 
 def gain_matrix(X, y, criterion, min_leaf):
-    """Gewinn (Unreinheit des Knotens minus gewichtete Unreinheit der Kinder) für jede Schwelle jedes Merkmals.
+    """Gain (Unreinheit des Knotens minus gewichtete Unreinheit der Kinder) für jede Schwelle jedes Merkmals.
     Rückgabe: (gain, thr, xs): Matrizen (m-1, d); gain = -inf, wo die Schwelle unzulässig ist (gleiche Werte, zu kleines Blatt)."""
     m, d = X.shape
     order = np.argsort(X, axis=0, kind="stable")
@@ -88,7 +88,7 @@ def gain_matrix(X, y, criterion, min_leaf):
 
 
 def best_split(X, y, criterion, min_leaf):
-    """(Merkmal, Schwelle, Gewinn) des besten Schnitts oder None. Bei Gleichstand gewinnt das kleinste Merkmal, dann die kleinste Schwelle."""
+    """(Merkmal, Schwelle, Gain) des besten Splits oder None. Bei Gleichstand gewinnt das kleinste Merkmal, dann die kleinste Schwelle."""
     if len(y) < 2 * min_leaf or len(y) < 2:
         return None
     gain, thr, _ = gain_matrix(X, y, criterion, min_leaf)
@@ -103,7 +103,7 @@ def best_split(X, y, criterion, min_leaf):
 # --- Wachsen ---------------------------------------------------------------------------------------------------------------------------------
 
 def grow(X, y, task="class", criterion=None, max_depth=None, min_leaf=1):
-    """Wächst den Baum Ebene für Ebene. Ein Knoten wird nicht geteilt, wenn er rein ist, die Tiefe erreicht ist oder kein zulässiger Schnitt existiert."""
+    """Wächst den Baum Ebene für Ebene. Ein Knoten wird nicht geteilt, wenn er rein ist, die Tiefe erreicht ist oder kein zulässiger Split existiert."""
     criterion = criterion or ("gini" if task == "class" else "variance")
     X = np.asarray(X, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -171,7 +171,7 @@ def decision_path(tree, x):
 
 
 def importances(tree):
-    """Wichtigkeit je Merkmal: Summe der gewichteten Unreinheitsabnahmen aller Schnitte dieses Merkmals, auf Summe 1 normiert (alles 0 bei Wurzelblatt)."""
+    """Wichtigkeit je Merkmal: Summe der gewichteten Unreinheitsabnahmen aller Splits dieses Merkmals, auf Summe 1 normiert (alles 0 bei Wurzelblatt)."""
     imp = np.zeros(tree.n_features)
     for t in tree.internal_nodes():
         l, r = tree.left[t], tree.right[t]
@@ -201,7 +201,7 @@ def collapse(tree, leaves):
 
 
 def tree_after_splits(tree, k):
-    """Der Baum nach den ersten k Schnitten (Breitenreihenfolge)."""
+    """Der Baum nach den ersten k Splits (Breitenreihenfolge)."""
     inner = tree.internal_nodes()
     return collapse(tree, inner[int(k):])
 
@@ -226,7 +226,7 @@ def _subtree_stats(tree, is_leaf):
 def pruning_path(tree):
     """Beschneidungspfad nach Kosten-Komplexität. Immer wird der Teilbaum mit dem kleinsten effektiven alpha = (R(t) - R(T_t)) / (|Blätter(T_t)| - 1) zum Blatt gemacht,
     dabei ist R die mit n/N gewichtete Unreinheit. Rückgabe: Liste von (alpha, Blätter, Gesamt-Unreinheit der Blätter, geschnittener Knoten); Eintrag 0 ist der volle Baum mit alpha 0.
-    Nach jedem Schnitt ändern sich nur die Vorfahren des Knotens; alpha wird nie kleiner als das vorige (wie in scikit-learn)."""
+    Nach jedem Split ändern sich nur die Vorfahren des Knotens; alpha wird nie kleiner als das vorige (wie in scikit-learn)."""
     m = tree.n_nodes
     is_leaf = tree.feature < 0
     cost = tree.n * tree.impurity / tree.n_total

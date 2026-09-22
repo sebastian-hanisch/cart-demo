@@ -1,4 +1,4 @@
-"""CART gegen unabhängige Referenzen: Brute-Force-Schnittsuche, scikit-learn (dort exakt, wo es keine Gleichstände gibt), Grenzfälle."""
+"""CART gegen unabhängige Referenzen: Brute-Force-Split-Suche, scikit-learn (dort exakt, wo es keine Gleichstände gibt), Grenzfälle."""
 
 import numpy as np
 import pytest
@@ -9,7 +9,7 @@ import cart_scenario as S
 
 
 def _continuous(n=400, d=5, seed=0, task="class", noise=1.6):
-    """Stetige Merkmale und stark verrauschte Ziele: so gibt es keine zufälligen Gleichstände zwischen Schnitten (reine oder fast reine Knoten hätten sie: ein einzelner Ausreißer lässt sich auf mehrere Arten abspalten)."""
+    """Stetige Merkmale und stark verrauschte Ziele: so gibt es keine zufälligen Gleichstände zwischen Splits (reine oder fast reine Knoten hätten sie: ein einzelner Ausreißer lässt sich auf mehrere Arten abspalten)."""
     rng = np.random.default_rng(seed)
     X = rng.normal(size=(n, d))
     signal = X[:, 0] + 0.7 * np.sin(2 * X[:, 1]) + 0.5 * (X[:, 2] > 0.3) * X[:, 3]
@@ -70,7 +70,7 @@ def test_best_split_with_ties_and_min_leaf(criterion, task):
 
 
 def test_ties_prefer_the_lowest_feature_then_the_lowest_threshold():
-    X = np.array([[0.0, 0.0], [1.0, 1.0], [2.0, 2.0], [3.0, 3.0]])           # zwei gleiche Spalten, y = 0 0 1 1: der beste Schnitt in der Mitte ist eindeutig
+    X = np.array([[0.0, 0.0], [1.0, 1.0], [2.0, 2.0], [3.0, 3.0]])           # zwei gleiche Spalten, y = 0 0 1 1: der beste Split in der Mitte ist eindeutig
     y = np.array([0.0, 0.0, 1.0, 1.0])
     assert alg.best_split(X, y, "gini", 1)[:2] == (0, 1.5)
     y2 = np.array([0.0, 1.0, 0.0, 1.0])                                       # Gleichstand zwischen zwei Schwellen derselben Spalte
@@ -179,7 +179,7 @@ def test_depth_zero_is_a_single_leaf_with_the_mean():
 def test_min_leaf_equal_to_n_and_pure_nodes_are_not_split():
     X, y = _continuous(40, 4, 0, "class")
     assert alg.grow(X, y, "class", None, None, 40).n_nodes == 1
-    assert alg.grow(X, y, "class", None, None, 21).n_nodes == 1                # n < 2 * min_leaf: kein zulässiger Schnitt
+    assert alg.grow(X, y, "class", None, None, 21).n_nodes == 1                # n < 2 * min_leaf: kein zulässiger Split
     assert alg.grow(X, np.ones(40), "class", None, None, 1).n_nodes == 1        # reiner Knoten
 
 

@@ -1,4 +1,4 @@
-"""Messungen an CART: Fehler gegen Tiefe, Beschneiden, Instabilität gegen kleine Datenänderungen, Anteil der Schnitte auf Rauschmerkmalen."""
+"""Messungen an CART: Fehler gegen Tiefe, Beschneiden, Instabilität gegen kleine Datenänderungen, Anteil der Splits auf Rauschmerkmalen."""
 
 from collections import Counter
 from dataclasses import dataclass
@@ -91,7 +91,7 @@ def instability(ds, task, criterion=None, max_depth=None, min_leaf=1, n_boot=C.B
 
 
 def split_shares(tree, n_real=C.N_BASE):
-    """Anteil der Schnitte auf Rauschmerkmalen (Spalten ab `n_real`), insgesamt und je Ebene [(Ebene, Schnitte, Anteil Rauschen)]."""
+    """Anteil der Splits auf Rauschmerkmalen (Spalten ab `n_real`), insgesamt und je Ebene [(Ebene, Splits, Anteil Rauschen)]."""
     inner = tree.internal_nodes()
     noisy = tree.feature[inner] >= n_real
     by_level = []
@@ -176,8 +176,8 @@ def verdict(a):
 
 
 def next_split(a, k):
-    """Der Schnitt Nummer k + 1 (Breitenreihenfolge) des gezeigten Baums, so wie ihn die Suche sieht: Knoten, Zahl der Lieferungen, bester Gewinn und beste Schwelle je Merkmal, gewähltes Merkmal.
-    None, wenn der Baum nach k Schnitten fertig ist."""
+    """Der Split Nummer k + 1 (Breitenreihenfolge) des gezeigten Baums, so wie ihn die Suche sieht: Knoten, Zahl der Lieferungen, bester Gain und beste Schwelle je Merkmal, gewähltes Merkmal.
+    None, wenn der Baum nach k Splits fertig ist."""
     tree = a.tree
     inner = tree.internal_nodes()
     if k >= len(inner):

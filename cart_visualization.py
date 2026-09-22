@@ -1,4 +1,4 @@
-"""Plotly-Darstellungen: Baumdiagramm, Karte über zwei Merkmale, Schnittsuche, Wichtigkeit, Fehlerkurven und Experimente. Alle Achsen sind gesperrt (Touch-Scrollen)."""
+"""Plotly-Darstellungen: Baumdiagramm, Karte über zwei Merkmale, Split-Suche, Wichtigkeit, Fehlerkurven und Experimente. Alle Achsen sind gesperrt (Touch-Scrollen)."""
 
 import numpy as np
 import plotly.graph_objects as go
@@ -47,8 +47,8 @@ def tree_layout(tree):
 
 
 def build_tree(tree, names, ds_y, next_node=None, path=None, height=460):
-    """Baum mit Schnitten (Knoten) und Blättern (gefärbt nach Blattwert). `next_node` = Knoten, der als Nächster geteilt wird (schwarzer Ring); `path` = Knoten eines Beispiels (orange Linie).
-    Knoten mit Schnitten auf Rauschmerkmalen haben einen orangen Rand."""
+    """Baum mit Splits (Knoten) und Blättern (gefärbt nach Blattwert). `next_node` = Knoten, der als Nächster geteilt wird (schwarzer Ring); `path` = Knoten eines Beispiels (orange Linie).
+    Knoten mit Splits auf Rauschmerkmalen haben einen orangen Rand."""
     x, y = tree_layout(tree)
     inner = tree.feature >= 0
     fig = go.Figure()
@@ -122,28 +122,28 @@ def build_map(tree, ds, fx, fy, sample=None, height=430):
     return lock_axes(fig, height)
 
 
-# --- Schnittsuche und Wichtigkeit ---------------------------------------------------------------------------------------------------------------------
+# --- Split-Suche und Wichtigkeit ---------------------------------------------------------------------------------------------------------------------
 
 def build_split_search(names, best_gain, chosen, height=330):
-    """Bester Gewinn je Merkmal für den Knoten, der als Nächster geteilt wird; das gewählte Merkmal ist schwarz."""
+    """Bester Gain je Merkmal für den Knoten, der als Nächster geteilt wird; das gewählte Merkmal ist schwarz."""
     d = len(names)
     colors = ["#111111" if f == chosen else (NOISE if f >= C.N_BASE else "#1f77b4") for f in range(d)]
     gains = [g if np.isfinite(g) else 0.0 for g in best_gain]
-    fig = go.Figure(go.Bar(x=gains, y=list(names), orientation="h", marker_color=colors, text=[f"{g:.4f}" if np.isfinite(b) else "kein zulässiger Schnitt" for g, b in zip(gains, best_gain)], textposition="outside", cliponaxis=False,
+    fig = go.Figure(go.Bar(x=gains, y=list(names), orientation="h", marker_color=colors, text=[f"{g:.4f}" if np.isfinite(b) else "kein zulässiger Split" for g, b in zip(gains, best_gain)], textposition="outside", cliponaxis=False,
                            hovertemplate="%{y}: %{x:.4f}<extra></extra>"))
     fig.update_yaxes(autorange="reversed")
-    fig.update_xaxes(title="bester Gewinn (Abnahme der Unreinheit)", rangemode="tozero")
+    fig.update_xaxes(title="bester Gain (Abnahme der Unreinheit)", rangemode="tozero")
     return lock_axes(fig, height, showlegend=False).update_layout(margin=dict(l=10, r=80, t=30, b=10))
 
 
 def build_gain_curve(names, f, thr, gain, chosen_thr, height=280):
-    """Gewinn über alle zulässigen Schwellen eines Merkmals."""
+    """Gain über alle zulässigen Schwellen eines Merkmals."""
     ok = np.isfinite(gain)
-    fig = go.Figure(go.Scatter(x=thr[ok], y=gain[ok], mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="Schwelle %{x:.4g}: Gewinn %{y:.4f}<extra></extra>"))
+    fig = go.Figure(go.Scatter(x=thr[ok], y=gain[ok], mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="Schwelle %{x:.4g}: Gain %{y:.4f}<extra></extra>"))
     if chosen_thr is not None:
         fig.add_vline(x=chosen_thr, line=dict(color="#111111", dash="dash"))
     fig.update_xaxes(title=f"Schwelle {feature_label(names, f)}")
-    fig.update_yaxes(title="Gewinn", rangemode="tozero")
+    fig.update_yaxes(title="Gain", rangemode="tozero")
     return lock_axes(fig, height, showlegend=False)
 
 
