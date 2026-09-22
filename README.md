@@ -1,5 +1,7 @@
 # CART – der Entscheidungsbaum – Streamlit-Demo
 
+**[→ Demo live ausprobieren](https://sebastianhanisch-cart-demo.streamlit.app/)**
+
 Erstes Stück der **Baumbasierten Linie** der "Konzepte"-Reihe für die Website "Sebastian Hanisch – Operations Research und Machine Learning" und die **erste Demo des Portfolios mit überwachtem Lernen** (bisher: Kombinatorik, Graphen, Clustering, Anomalieerkennung):
 anders als die Fall-Demos im Portfolio (ein Anwendungsfall, mehrere Verfahren im Vergleich) zeigt diese Demo **ein** Verfahren – **CART**, den Entscheidungsbaum (Breiman, Friedman, Olshen, Stone 1984) – an einem wachsenden Beispiel.
 Vehikel: **Lieferungen** mit acht echten Merkmalen (Distanz, Ladegewicht, Stopps, Verkehr, Wetter, Wochentag, Zeitfenster-Enge, Fahrerjahre) und einstellbar vielen **Rauschmerkmalen**; Klassifikation ("kommt die Lieferung zu spät?") und Regression ("wie lange dauert sie?") auf denselben Merkmalen.
