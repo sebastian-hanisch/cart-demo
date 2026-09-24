@@ -24,6 +24,7 @@ from cart_presets import (
     init_session_state_defaults,
     load_permalink_settings,
     randomize_seed,
+    seed_widget,
     sync_query_params,
 )
 from cart_visualization import (
@@ -115,14 +116,15 @@ st.caption("🔗 Die Adresszeile oben spiegelt Ihre aktuelle Konfiguration wider
 
 load_permalink_settings()
 init_session_state_defaults()
-if st.session_state["criterion_select"] not in ("gini", "entropy"):
-    st.session_state["criterion_select"] = "gini"
+if st.session_state.get(KEPT["criterion_select"], "gini") not in ("gini", "entropy"):
+    st.session_state[KEPT["criterion_select"]] = "gini"
 
 with st.sidebar:
     st.header("⚙️ Einstellungen")
     task = st.selectbox("Aufgabe", C.TASKS, key="task_select", format_func=lambda k: C.TASK_LABELS[k],
                         help="Klassifikation: das Blatt sagt, mit welcher Wahrscheinlichkeit die Lieferung zu spät kommt. Regression: das Blatt sagt die Dauer in Minuten. Dieselben Lieferungen und Merkmale, nur das Ziel wechselt; es ändern sich Split-Kriterium und Blattwert, sonst nichts.")
     if task == "class":
+        seed_widget("criterion_select")
         crit = st.selectbox("Split-Kriterium", C.CRITERIA["class"], key="criterion_select", format_func=lambda k: C.CRITERION_LABELS[k],
                             help="Gini (2p(1-p)) und Entropie messen beide, wie gemischt ein Knoten ist; sie liegen fast immer beieinander. Auf sechs Datensätzen wählen sie in 2 dieselben Merkmale für die ersten sieben Splits, die Vorhersagen (Tiefe 4, Blatt ≥ 5) stimmen auf den Testlieferungen zu 92 bis 98 % überein.")
         st.session_state[KEPT["criterion_select"]] = crit
@@ -141,6 +143,7 @@ with st.sidebar:
     n_noise = st.slider("Rauschmerkmale", *bounds("n_noise_slider"), key="n_noise_slider",
                         help="Zusätzliche Merkmale ohne jeden Bezug zum Ziel (Zufallszahlen). Ein voll gewachsener Baum benutzt sie trotzdem - Klassifikation, Mittel über sechs Datensätze: mit 3 Rauschmerkmalen liegen 16 % seiner Splits auf Rauschen, mit 8 sind es 29 %; nahe der Wurzel kaum (in den ersten vier Ebenen zusammen 5 bzw. 8 Splits über alle sechs Datensätze).")
     if task == "class":
+        seed_widget("label_noise_slider")
         label_noise = st.slider("Falsche Etiketten im Training [%]", *bounds("label_noise_slider"), key="label_noise_slider",
                                 help="Anteil der Trainingslieferungen, deren Etikett (pünktlich / zu spät) vertauscht ist; der Test bleibt sauber. Klassifikation, Mittel über sechs Datensätze: der voll gewachsene Baum verliert stark (Testfehler 20.4 % bei 0, 25.4 % bei 10, 35.0 % bei 20 % falschen Etiketten), ein flacher Baum (Tiefe 4, Blatt ≥ 5) kaum (17.1 %, 17.1 %, 21.8 %).")
         st.session_state[KEPT["label_noise_slider"]] = label_noise
@@ -158,6 +161,7 @@ full_leaves = full_a.full.n_leaves
 with prune_slot:
     if prune_mode == "manual":
         if full_leaves > 2:
+            seed_widget("prune_leaves_slider")
             pl = st.slider("Höchstens so viele Blätter", 2, full_leaves, key="prune_leaves_slider",
                            help="Der Baum auf dem Beschneidungspfad mit den meisten Blättern, die höchstens so viele sind wie hier gewählt. Ganz rechts: der volle Baum.")
             st.session_state[KEPT["prune_leaves_slider"]] = pl
